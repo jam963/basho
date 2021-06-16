@@ -1,1 +1,2 @@
-best_of_basho.txt
+*.txt
+/__pycache__
