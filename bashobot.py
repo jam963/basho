@@ -1,3 +1,9 @@
+"""
+A discord bot that writes short poems in the style of Matsuo Basho.
+
+When a message begins with PREFIX, message content is passed to a Poet
+object that generates a short poem. The bot is very simple and does not log exceptions. 
+"""
 from poets import *
 from consts import *
 import json
@@ -7,13 +13,9 @@ client = discord.Client()
 basho = Poet(HEADER, CORPUS)
 
 @client.event
-async def on_ready():
-    print("Logged in as {0.user}".format(client))
-
-@client.event
 async def on_message(message):
     """
-    Sends an embed of a poem when called by a message beginning with PREFIX. What
+    Sends a poem (as text) when called by a message beginning with PREFIX. What
     follows the PREFIX is the seed for the poem. Any exception prompts the user to try again.
     """
     # Return if for whatever reason the bot is the user
