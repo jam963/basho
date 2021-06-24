@@ -9,6 +9,8 @@ import openai
 import os
 import json
 import random
+from poem import *
+
 
 class Poet(object):
     """
@@ -20,11 +22,11 @@ class Poet(object):
     more examples seem to return worse results). Default OpenAI parameter values are hardcoded here,
     since these have produced the best results so far.
     """
-    
+
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     def __init__(self, header, corpus, engine="davinci", temp=0.75, max_len=64,
-                tp=0.7, freq_pen=0.6, pres_pen=0.6):
+                 tp=0.7, freq_pen=0.6, pres_pen=0.6):
         """
         Initializer for the Poet class.
 
@@ -60,31 +62,31 @@ class Poet(object):
         self._pres_pen = pres_pen
 
     # Getters and setters
-    def getHeader():
+    def get_header(self):
         return self._header
 
-    def getCorpus():
+    def get_corpus(self):
         return self._corpus
 
-    def getEngine():
+    def get_engine(self):
         return self._engine
 
-    def getTemp():
+    def get_temp(self):
         return self._temp
 
-    def getMaxLen():
+    def get_max_len(self):
         return self._max_len
 
-    def getTP():
+    def get_tp(self):
         return self._tp
 
-    def getFreqPen():
+    def get_freq_pen(self):
         return self._freq_pen
 
-    def getPresPen():
+    def get_pres_pen(self):
         return self._pres_pen
 
-    def setHeader(header):
+    def set_header(self, header):
         """
         Parameter header: header is the new header (a short description of what the engine
         is to do)
@@ -92,7 +94,7 @@ class Poet(object):
         """
         self._header = header
 
-    def setCorpus(corpus):
+    def set_corpus(self, corpus):
         """
         Parameter corpus: A json file of label, poem pairs.
         Precondition: corpus is a valid json file.
@@ -100,42 +102,43 @@ class Poet(object):
         with open(corpus) as json_file:
             self._corpus = json.load(json_file)
 
-    def setEngine(engine):
+    def set_engine(self, engine):
         """
         Parameter engine: an OpenAI engine. Refer to the OpenAI documentation for more info.
         Precondition: engine is a valid OpenAI engine (as a string)
         """
         self._engine = engine
 
-    def setTemp(temp):
+    def set_temp(self, temp):
         """
         Parameter temp: the temperature parameter for the engine.
         Precondition: temp is a float between 0.0 and 1.0
         """
         self._temp = temp
 
-    def setMaxLen(ml):
+    def set_max_len(self, ml):
         """
         Parameter ml: the maximum length (in tokens) of the generated text.
         Precondition: ml is an int < 2048 (bearing in mind financial costs of longer texts)
         """
+
         self._max_len = ml
 
-    def setTP(tp):
+    def set_tp(self, tp):
         """
         Parameter tp: tp is the top_p paramter for OpenAI.
         Precondition: tp is a float between 0.0 and 1.0.
         """
         self._tp = tp
 
-    def setFreqPen(fp):
+    def set_freq_pen(self, fp):
         """
         Parameter fp: freq_pen is the frequency_penalty parameter for OpenAI.
         Precondition: freq_pen is a float between 0.0 and 1.0.
         """
         self._freq_pen = fp
 
-    def setPresPen(pp):
+    def set_pres_pen(self, pp):
         """
         Parameter pp: pres_pen is the presence_penalty paramter for OpenAI.
         Precondition: pres_pen is a float between 0.0 and 1.0.
@@ -154,8 +157,7 @@ class Poet(object):
         Parameter seed: a word used to generate the poem.
         Precondition: seed is a (one or two word) string.
         """
-        p = self.promptBuilder(size, self._corpus, self._header) + "Seed: " + seed + "\nPoem:"
-        print(p)
+        p = self.build_prompt(size, self._corpus, self._header) + "Seed: " + seed + "\nPoem:"
         response = openai.Completion.create(
            engine=self._engine,
            prompt=p,
@@ -168,7 +170,13 @@ class Poet(object):
          )
         return response.choices[0]["text"]
 
-    def randomKeys(self, size, dict):
+    def generate_poem(self, size, seed):
+        """
+        """
+        text = self.generate(size, seed)
+        return Poem(text)
+
+    def random_keys(self, size, dict):
         """
         Returns a list of pseudorandom keys from a provided dictionary of a given
         number of labeled examples of poems.
@@ -187,7 +195,7 @@ class Poet(object):
                 sample_keys.append(corpus_keys[key_ix])
         return sample_keys
 
-    def promptBuilder(self, size, dict, header):
+    def build_prompt(self, size, dict, header):
         """
         Builds a prompt for OpenAI given a corpus of labeled examples.
 
@@ -199,8 +207,8 @@ class Poet(object):
         Parameter header: header is a brief description of the poems to be generated.
         Precondition: header is a string (a short one) ending in two trailing "\n".
         """
-        sample_keys = self.randomKeys(size, dict)
+        sample_keys = self.random_keys(size, dict)
         prompt = header
         for key in sample_keys:
-            prompt = prompt + "Seed: {}\nPoem: {}\n###\n".format(key, dict[key])
+            prompt += "Seed: {}\nPoem: {}\n###\n".format(key, dict[key])
         return prompt

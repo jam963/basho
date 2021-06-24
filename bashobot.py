@@ -2,15 +2,16 @@
 A discord bot that writes short poems in the style of Matsuo Basho.
 
 When a message begins with PREFIX, message content is passed to a Poet
-object that generates a short poem. The bot is very simple and does not log exceptions. 
+object that generates a short poem. The bot is very simple and does not log exceptions.
 """
-from poets import *
+from poet import *
 from consts import *
 import json
 import discord
 
 client = discord.Client()
 basho = Poet(HEADER, CORPUS)
+
 
 @client.event
 async def on_message(message):
@@ -25,12 +26,13 @@ async def on_message(message):
     if message.content.startswith(PREFIX) and len(message.content) < 50:
         seed = message.content[2:]
         try:
-            poem = poemFormatter(basho.generate(SIZE, seed))
+            poem = format_poem(basho.generate(SIZE, seed))
             await message.channel.send(poem)
         except:
             await message.channel.send("Try again, {}.".format(message.author.mention))
 
-def poemFormatter(poem):
+
+def format_poem(poem):
     """
     Formats the poem.
 
@@ -43,5 +45,6 @@ def poemFormatter(poem):
     ix = text.rindex("\n")
     text = text[:ix+1] + "\t" + poem[ix+1:]
     return text
+
 
 client.run(TOKEN)

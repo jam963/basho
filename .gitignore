@@ -1,2 +1,7 @@
 *.txt
+*.gexf
 /__pycache__
+/graph_tests.py
+/edge.py
+/node.py
+/wordgraph.py
