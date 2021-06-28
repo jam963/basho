@@ -1,10 +1,10 @@
 import networkx as nx
-from node import *
+import networkx.algorithms as algs
 
 
 class WordGraph(object):
     """
-    A instance is a graph of words from a set of Poems.
+    A instance is a DiGraph of words from a set of Poems.
     """
 
     def __init__(self, poems):
@@ -31,10 +31,17 @@ class WordGraph(object):
     def get_graph(self):
         return self._g
 
-    def get_gexf(self, name):
+    def write_gexf(self, name):
         """
-        Returns a .gexf file of the graph g
+        Writes .gexf file of the graph g
         Parameter name: the filename
         Precondition: name is a string ending in ".gexf"
         """
         nx.write_gexf(self._g, name)
+
+    def update_betweenness(self):
+        """
+        """
+        betweenness = algs.betweenness_centrality(self._g)
+        for key in betweenness:
+            self._g.nodes[key]["betweenness"] = betweenness[key]
