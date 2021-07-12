@@ -6,9 +6,9 @@ class WordGraph(object):
     """
     A instance is a DiGraph of words from a set of Poems.
     """
+    _g = nx.DiGraph()
 
     def __init__(self, poems):
-        self._g = nx.DiGraph()
         for p in poems:
             words = p.get_words()
             for i in range(len(words)):
