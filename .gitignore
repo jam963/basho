@@ -1,3 +1,4 @@
+*.swp
 *.txt
 *.gexf
 /__pycache__
