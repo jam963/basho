@@ -23,7 +23,7 @@ class PdbWrangler(object):
         Returns a set of Poems from poetryDataBase matching given criteria.
 
         Parameter author: The author of a poem (the author must be present
-                          in the poetrydb database)
+        in the poetrydb database)
         Precondition: author is a string.
         Parameter title: A word or words present in the title of a poem
         Precondition: title is a string
@@ -34,8 +34,7 @@ class PdbWrangler(object):
         Parameter poemcount: The number of poems to return from poetrydb.
         Precondition: poemcount is an int.
         Parameter abs: True if all parameters should be matched exactly. Refer
-                       to the poetrydb api docs for more on how abs is handled.
-
+        to the poetrydb api docs for more on how abs is handled.
         """
         args = {"author": author, "title": title, "lines": lines,
                 "linecount": linecount, "poemcount": poemcount}
