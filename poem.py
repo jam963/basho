@@ -1,6 +1,7 @@
-from nxwordgraph import *
 import networkx as nx
 import networkx.algorithms as algs
+from wordgraph import WordGraph
+from syngraph import SynGraph
 
 
 class Poem:
@@ -25,13 +26,14 @@ class Poem:
         Parameter label (optional): A label for the Poem.
         Precondition: label is a string.
         """
-        self._text = text.replace("/", delimiter)
+        self._text = text.replace("/", delimiter).lower()
         self._words = self._text.split()
         self._length = len(self._words)
         self._lines = self._text.count(delimiter) + 1
         self._author = author
         self._title = title
         self._label = label
+        self._sg = None
         self._wg = None
         self._density = None
         self._num_nodes = None
@@ -46,6 +48,11 @@ class Poem:
 
     def get_length(self):
         return self._length
+
+    def get_sg(self):
+        if self._sg is None:
+            raise Exception("SynGraph for this poem does not exist.")
+        return self._sg
 
     def get_wg(self):
         if self._wg is None:
@@ -103,6 +110,16 @@ class Poem:
         self._num_nodes = nx.number_of_nodes(self._wg.get_graph())
         self._density = nx.density(self._wg.get_graph())
 
+    def gen_sg(self, nym=True):
+        """
+        Generate a SynGraph of the Poem.
+
+        Parameter nym: Whether the SynGraph is heteronymic (True) or hyponymic
+        (False).
+        Precondition: nym is a bool.
+        """
+        self._sg = SynGraph(self, nym)
+
     def update_cycles(self):
         """
         Updates the number of cycles in the Poem's WordGraph. Raises an
@@ -114,3 +131,6 @@ class Poem:
         for i in cycle_generator:
             self._cycles.append(i)
         self._num_cycles = len(self._cycles)
+
+    def __hash__(self):
+        return hash(self._text)
