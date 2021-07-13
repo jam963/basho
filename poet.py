@@ -9,7 +9,7 @@ import openai
 import os
 import json
 import random
-from poem import *
+from poem import Poem
 
 
 class Poet(object):
@@ -34,9 +34,9 @@ class Poet(object):
 
         Parameter header: A short description of what the Poet will write.
         Precondition: header is a string (preferably a short one, such as "Writes
-            haikus in the style of Basho"
+        haikus in the style of Basho"
         Parameter corpus: A json file composed of (label, poem) pairs, where poems have
-            lines separated by "/".
+        lines separated by "/".
         Precondition: corpus is a valid json file.
         Parameter engine: The OpenAI engine to use to generate the poem.
         Precondition: engine is a valid engine.
