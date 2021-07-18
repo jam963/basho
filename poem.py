@@ -1,13 +1,13 @@
 import networkx as nx
 import networkx.algorithms as algs
-from wordgraph import WordGraph
+from nxwordgraph import WordGraph
 from syngraph import SynGraph
 
 
 class Poem:
     """
     Each instance represents a Poem from a corpus. Poems have text, which is composed
-    of individual words. The text has a lenghth (in words) and a number of lines.
+    of individual words. The text has a length (in words) and a number of lines.
     One can define an author, title, and/or label, as well as a line delimiter
     (default is " % "). Poem's constructor expects poem text to have lines
     delimited by "/"
@@ -30,15 +30,15 @@ class Poem:
         self._words = self._text.split()
         self._length = len(self._words)
         self._lines = self._text.count(delimiter) + 1
-        self._author = author
-        self._title = title
-        self._label = label
-        self._sg = None
-        self._wg = None
         self._density = None
         self._num_nodes = None
         self._cycles = []
         self._num_cycles = None
+        self.author = author
+        self.title = title
+        self.label = label
+        self.sg = None
+        self.wg = None
 
     def get_text(self):
         return self._text
@@ -59,19 +59,14 @@ class Poem:
             raise Exception("WordGraph for this Poem does not exist.")
         return self._wg
 
-    def get_graph(self):
-        if self._wg is None:
-            raise Exception("WordGraph for this Poem does not exist.")
-        return self._wg.get_graph()
-
     def get_author(self):
-        return self._author
+        return self.author
 
     def get_title(self):
-        return self._title
+        return self.title
 
     def get_label(self):
-        return self._label
+        return self.label
 
     def get_cycles(self):
         return self._cycles
@@ -93,13 +88,13 @@ class Poem:
         return self._lines
 
     def set_author(self, author):
-        self._author = author
+        self.author = author
 
     def set_title(self, title):
-        self._title = title
+        self.title = title
 
     def set_label(self, label):
-        self._label = label
+        self.label = label
 
     def gen_wg(self):
         """
@@ -132,5 +127,23 @@ class Poem:
             self._cycles.append(i)
         self._num_cycles = len(self._cycles)
 
-    def __hash__(self):
-        return hash(self._text)
+    def betweenness(self, syn=True, normal=True):
+        """
+        Returns a dictionary of betweenness centrality for all nodes in _g.
+
+        Parameter syn: True for betweenness of the Poem's SynGraph, False for
+        WordGraph.
+        Precondition: syn is a bool.
+        Parameter normal: Whether betweenness is normalized.
+        Precondition: normal is a bool.
+        """
+        if syn:
+            if self._sg is None:
+                raise Exception("SynGraph for this Poem does not exist.")
+            return algs.betweenness_centrality(self._sg.get_graph(),
+                                               normalized=normal)
+        else:
+            if self._wg is None:
+                raise Exception("WordGraph for this Poem does not exist.")
+            return algs.betweenness_centrality(self._wg.get_graph(),
+                                               normalized=normal)
