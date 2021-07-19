@@ -1,22 +1,16 @@
-"""
-A module for creating graphs based on WordNet synsets.
-"""
-
+from bgraph import bGraph
 from nltk.corpus import wordnet as wn
-import networkx as nx
 import re
 
 
-class SynGraph(object):
+class SynGraph(bGraph):
     """
     A graph of words based on synsets. The graph is either hypernymic (by
-    default) or hyponimic, i.e. edges represent words that share either an
-    element of their synset and/or hypo/hypernyms.
+    default) or hyponimic, i.e. edges represent words that share
+    hypo/hypernyms.
     """
-    _dict = {}
-    _g = nx.Graph()
 
-    def __init__(self, poem, hyp=True):
+    def __init__(self, poem, hyp=True, regex=r"\W+"):
         """
         Initializer for the SynGraph class.
 
@@ -24,11 +18,17 @@ class SynGraph(object):
         Precondition: poem is a valid Poem object.
         Parameter hyp: True if the SynGraph is hypernymic (default) or
         hyponymic.
-
+        Parameter regex: A regular expression or function to be applied to the
+        Poem's words.
+        Precondition: regex is a valid regular expression or function to be
+        passed to re.sub().
         """
+        super(SynGraph, self).__init__()
+        self._syn_word = {}
         for word in poem.get_words():
-            # Remove non-alphanumeric chars from words
-            w = re.sub(r"\W+", "", word)
+            # Remove non-alphanumeric chars from words except for those
+            # specified in nonalpha.
+            w = re.sub(regex, "", word)
             # Do not create nodes for empty strings
             # For non-empty words, add all synsets associated with the word
             # to the graph _g. For duplicate synsets, update occurrences.
@@ -39,15 +39,7 @@ class SynGraph(object):
                 else:
                     self._g.nodes[w]["occurrences"] += 1
                 for syn in syns:
-                    if syn not in self._dict:
-                        self._dict.update({syn: {w}})
-                    else:
-                        others = self._dict[syn]
-                        for other in others:
-                            if other != w:
-                                self._g.add_edge(w, other, synset=syn.name())
-                        self._dict[syn].add(w)
-                    self._hyp_adder(syn, w, self._g, self._dict, hyp)
+                    self._hyp_adder(syn, w, self._g, self._syn_word, hyp)
 
     def _hyp_adder(self, syn, word, graph, dict, h):
         """
@@ -59,12 +51,42 @@ class SynGraph(object):
             hy = syn.hypernyms()
         else:
             hy = syn.hyponyms()
-        for h in hy:
-            if h not in dict:
-                dict.update({h: {word}})
+        for nym in hy:
+            if nym not in dict:
+                dict.update({nym: {word}})
             else:
-                others = dict[h]
+                others = dict[nym]
                 for other in others:
                     if other != word:
-                        graph.add_edge(word, other, synset=h.name())
-                dict[h].add(word)
+                        graph.add_edge(word, other, synset=nym.name())
+                dict[nym].add(word)
+
+    def get_syns(self):
+        """
+        Returns a dictionary of {synset: [word]} pairs for the SynGraph.
+        """
+        return self._syn_word
+
+    def get_syn_count(self):
+        """
+        Returns a dictionary of {synset: [count]} pairs, where synset is a
+        string representation of a synset in the SynGraph, and count is
+        the length of the list of words associated with that synset.
+        """
+        syn_counts = {}
+        for key, value in self._syn_word:
+            syn_counts.update({key.name(): [len(value)]})
+        return syn_counts
+
+    def get_syn_frac(self):
+        """
+        Returns a dictionary of {synset: [fraction]} pairs, where synset is a
+        string representation of a synset in the SynGraph, and fraction is the
+        length of the list of words associated with that synset divided by the
+        total number of nodes in the graph.
+        """
+        syn_counts = {}
+        for key, value in self._syn_word:
+            frac = len(value)/self.get_num_nodes()
+            syn_counts.update({key.name(): [frac]})
+        return syn_counts
