@@ -32,6 +32,7 @@ class bGraph(object):
     def write_gexf(self, name):
         """
         Writes .gexf file of the graph to the folder "gephi"
+
         Parameter name: the filename or path
         Precondition: name is a string ending in ".gexf"
         """
