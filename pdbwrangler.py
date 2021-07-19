@@ -4,16 +4,14 @@ documentation can be found here:
 https://github.com/thundercomb/poetrydb/blob/master/README.md
 
 """
-from poem import *
+from poem import Poem
 import requests
-import json
 
 
 class PdbWrangler(object):
     """
     This class provides a straightforward way to deal with the PoetryDB api.
     """
-
     def __init__(self):
         self._baseUrl = "https://poetrydb.org/"
 
@@ -36,6 +34,7 @@ class PdbWrangler(object):
         Parameter abs: True if all parameters should be matched exactly. Refer
         to the poetrydb api docs for more on how abs is handled.
         """
+        self._d = d
         args = {"author": author, "title": title, "lines": lines,
                 "linecount": linecount, "poemcount": poemcount}
         input = []
@@ -51,7 +50,7 @@ class PdbWrangler(object):
         search = ';'.join([str(x) for x in search])
         url = self._baseUrl + input + '/' + search
         poems_json = self._get_json(url)
-        poems = self._to_poem(poems_json, delim=d)
+        poems = self._to_poem(poems_json)
         return poems
 
     def get_random_poems(self, num, d=" % "):
@@ -63,12 +62,13 @@ class PdbWrangler(object):
         Parameter d: The delimiter to use between lines in the Poems.
         Precondition: d is a string.
         """
+        self._d = d
         url = self._baseUrl + "random/" + str(num)
         poems_json = self._get_json(url)
-        poems = self._to_poem(poems_json, delim=d)
+        poems = self._to_poem(poems_json)
         return poems
 
-    def _to_poem(self, json_file, delim):
+    def _to_poem(self, json_file):
         """
         Converts Json from poetrydb into a set of Poem objects.
 
@@ -82,8 +82,8 @@ class PdbWrangler(object):
             t = i["title"]
             a = i["author"]
             lines = i["lines"]
-            text = delim.join(lines)
-            poem = Poem(text.lower(), author=a, title=t, delimiter=delim)
+            text = self._d.join(lines)
+            poem = Poem(text.lower(), author=a, title=t, delimiter=self._d)
             poems.add(poem)
         return poems
 
