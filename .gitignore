@@ -1,8 +1,12 @@
+*.csv
 *.swp
 *.txt
 *.gexf
+*.gephi
 /__pycache__
+/csv_tests.py
+/nltk_tests.py
 /graph_tests.py
 /edge.py
 /node.py
-/wordgraph.py
+/old_wordgraph.py
