@@ -51,99 +51,15 @@ class Poet(object):
         Paramter pres_pen: pres_pen is the presence_penalty paramter for OpenAI.
         Precondition: pres_pen is a float between 0.0 and 1.0.
         """
-        self._header = header + "\n\n"
+        self.header = header + "\n\n"
         with open(corpus) as json_file:
-            self._corpus = json.load(json_file)
-        self._engine = engine
-        self._temp = temp
-        self._max_len = max_len
-        self._tp = tp
-        self._freq_pen = freq_pen
-        self._pres_pen = pres_pen
-
-    # Getters and setters
-    def get_header(self):
-        return self._header
-
-    def get_corpus(self):
-        return self._corpus
-
-    def get_engine(self):
-        return self._engine
-
-    def get_temp(self):
-        return self._temp
-
-    def get_max_len(self):
-        return self._max_len
-
-    def get_tp(self):
-        return self._tp
-
-    def get_freq_pen(self):
-        return self._freq_pen
-
-    def get_pres_pen(self):
-        return self._pres_pen
-
-    def set_header(self, header):
-        """
-        Parameter header: header is the new header (a short description of what the engine
-        is to do)
-        Precondition: header is a one-sentence or shorter string
-        """
-        self._header = header
-
-    def set_corpus(self, corpus):
-        """
-        Parameter corpus: A json file of label, poem pairs.
-        Precondition: corpus is a valid json file.
-        """
-        with open(corpus) as json_file:
-            self._corpus = json.load(json_file)
-
-    def set_engine(self, engine):
-        """
-        Parameter engine: an OpenAI engine. Refer to the OpenAI documentation for more info.
-        Precondition: engine is a valid OpenAI engine (as a string)
-        """
-        self._engine = engine
-
-    def set_temp(self, temp):
-        """
-        Parameter temp: the temperature parameter for the engine.
-        Precondition: temp is a float between 0.0 and 1.0
-        """
-        self._temp = temp
-
-    def set_max_len(self, ml):
-        """
-        Parameter ml: the maximum length (in tokens) of the generated text.
-        Precondition: ml is an int < 2048 (bearing in mind financial costs of longer texts)
-        """
-
-        self._max_len = ml
-
-    def set_tp(self, tp):
-        """
-        Parameter tp: tp is the top_p paramter for OpenAI.
-        Precondition: tp is a float between 0.0 and 1.0.
-        """
-        self._tp = tp
-
-    def set_freq_pen(self, fp):
-        """
-        Parameter fp: freq_pen is the frequency_penalty parameter for OpenAI.
-        Precondition: freq_pen is a float between 0.0 and 1.0.
-        """
-        self._freq_pen = fp
-
-    def set_pres_pen(self, pp):
-        """
-        Parameter pp: pres_pen is the presence_penalty paramter for OpenAI.
-        Precondition: pres_pen is a float between 0.0 and 1.0.
-        """
-        self._pres_pen = pp
+            self.corpus = json.load(json_file)
+        self.engine = engine
+        self.temp = temp
+        self.max_len = max_len
+        self.tp = tp
+        self.freq_pen = freq_pen
+        self.pres_pen = pres_pen
 
     def generate(self, size, seed):
         """
@@ -157,15 +73,15 @@ class Poet(object):
         Parameter seed: a word used to generate the poem.
         Precondition: seed is a (one or two word) string.
         """
-        p = self.build_prompt(size, self._corpus, self._header) + "Seed: " + seed + "\nPoem:"
+        p = self.build_prompt(size, self.corpus, self.header) + "Seed: " + seed + "\nPoem:"
         response = openai.Completion.create(
-           engine=self._engine,
+           engine=self.engine,
            prompt=p,
-           temperature=self._temp,
-           max_tokens=self._max_len,
-           top_p=self._tp,
-           frequency_penalty=self._freq_pen,
-           presence_penalty=self._pres_pen,
+           temperature=self.temp,
+           max_tokens=self.max_len,
+           top_p=self.tp,
+           frequency_penalty=self.freq_pen,
+           presence_penalty=self.pres_pen,
            stop=["###"]
          )
         return response.choices[0]["text"]
