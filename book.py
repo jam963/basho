@@ -20,8 +20,8 @@ class Book(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    @staticmethod
-    def from_poems(poems, by="label", **kwargs):
+    @classmethod
+    def from_poems(cls, poems, by="label", **kwargs):
         """
         Initializes a Book object from an iterable of Poems.
 
@@ -32,7 +32,7 @@ class Book(object):
         Precondition: by is a valid attribute for all poems in poems.
         """
         pages = {getattr(poem, by): poem for poem in poems}
-        return Book(pages, **kwargs)
+        return cls(pages, **kwargs)
 
     def __iter__(self):
         """
