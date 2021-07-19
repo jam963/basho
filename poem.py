@@ -26,10 +26,10 @@ class Poem:
         Parameter label (optional): A label for the Poem.
         Precondition: label is a string.
         """
-        self._text = text.replace("/", delimiter).lower()
-        self._words = self._text.split()
+        self.text = text.replace("/", delimiter).lower()
+        self._words = self.text.split()
         self._length = len(self._words)
-        self._lines = self._text.count(delimiter) + 1
+        self._lines = self.text.count(delimiter) + 1
         self._density = None
         self._num_nodes = None
         self._cycles = []
@@ -41,7 +41,7 @@ class Poem:
         self.wg = None
 
     def get_text(self):
-        return self._text
+        return self.text
 
     def get_words(self):
         return self._words
