@@ -12,6 +12,7 @@ class PdbWrangler(object):
     """
     This class provides a straightforward way to deal with the PoetryDB api.
     """
+
     def __init__(self):
         self._baseUrl = "https://poetrydb.org/"
 
