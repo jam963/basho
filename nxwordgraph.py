@@ -1,14 +1,16 @@
+from bgraph import bGraph
 import networkx as nx
 import networkx.algorithms as algs
 
 
-class WordGraph(object):
+class WordGraph(bGraph):
     """
     A instance is a DiGraph of words from a set of Poems.
     """
-    _g = nx.DiGraph()
 
     def __init__(self, poems):
+        super(WordGraph, self).__init__()
+        self._g = nx.DiGraph()
         for p in poems:
             words = p.get_words()
             for i in range(len(words)):
@@ -28,19 +30,9 @@ class WordGraph(object):
                         else:
                             self._g.add_edge(words[i-1], words[i], weight=1)
 
-    def get_graph(self):
-        return self._g
-
-    def write_gexf(self, name):
-        """
-        Writes .gexf file of the graph g
-        Parameter name: the filename
-        Precondition: name is a string ending in ".gexf"
-        """
-        nx.write_gexf(self._g, name)
-
     def update_betweenness(self):
         """
+        Updates betweenness centrality for all nodes in the graph.
         """
         betweenness = algs.betweenness_centrality(self._g)
         for key in betweenness:
