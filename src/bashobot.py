@@ -5,8 +5,8 @@ When a message begins with PREFIX, message content is passed to a Poet
 object that generates a short poem. The bot is very simple and does not log
 exceptions.
 """
-from poet import Poet
-from consts import *
+from basho.src.poet import Poet
+from basho.src.consts import *
 import json
 import discord
 

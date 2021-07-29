@@ -9,7 +9,8 @@ import openai
 import os
 import json
 import random
-from poem import Poem
+from basho.src.poem import Poem
+from basho.src.book import Book
 
 
 class Poet(object):
@@ -25,8 +26,8 @@ class Poet(object):
 
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    def __init__(self, header, corpus, engine="davinci", temp=0.75, max_len=64,
-                 tp=0.7, freq_pen=0.6, pres_pen=0.6):
+    def __init__(self, header, corpus, engine="davinci", temp=0.75,
+                 max_len=64, tp=0.7, freq_pen=0.6, pres_pen=0.6, file=True):
         """
         Initializer for the Poet class.
 
@@ -52,16 +53,39 @@ class Poet(object):
         Precondition: pres_pen is a float between 0.0 and 1.0.
         """
         self.header = header + "\n\n"
-        with open(corpus) as json_file:
-            self.corpus = json.load(json_file)
         self.engine = engine
         self.temp = temp
         self.max_len = max_len
         self.tp = tp
         self.freq_pen = freq_pen
         self.pres_pen = pres_pen
+        with open(corpus) as json_file:
+            self.corpus = json.load(json_file)
 
-    def generate(self, size, seed):
+    @classmethod
+    def from_book(cls, header, path, book, keep=True):
+        """
+        If two Poems have the same label, only the first in the Book will be
+        used!
+
+        Parameter keep: Whether to keep the original Book as an attribute of the
+        Poet.
+        """
+        poems = {}
+        for label in book:
+            poem = book.pages[label]
+            text = poem.text
+            poems.update({label: text})
+        json_poems = json.dumps(poems)
+        with open(path, "w") as file:
+            file.write(json_poems)
+        if keep:
+            new_poet = cls(header, path)
+            new_poet.book = book
+            return new_poet
+        return cls(header, path)
+
+    def generate(self, size, seed, verbose=False):
         """
         Returns a poem (with the poem's lines separated by "/") as a string.
 
@@ -73,10 +97,10 @@ class Poet(object):
         Parameter seed: a word used to generate the poem.
         Precondition: seed is a (one or two word) string.
         """
-        p = self.build_prompt(size, self.corpus, self.header) + "Seed: " + seed + "\nPoem:"
+        p = self.build_prompt(size, self.corpus, self.header)
         response = openai.Completion.create(
            engine=self.engine,
-           prompt=p,
+           prompt=p + "Seed: " + seed + "\nPoem:",
            temperature=self.temp,
            max_tokens=self.max_len,
            top_p=self.tp,
@@ -84,15 +108,51 @@ class Poet(object):
            presence_penalty=self.pres_pen,
            stop=["###"]
          )
+        if verbose:
+            return p + "\nSeed: " + seed + "\nGenerated poem: \n" + \
+                   response.choices[0]["text"]
         return response.choices[0]["text"]
 
     def generate_poem(self, size, seed):
         """
         """
         text = self.generate(size, seed)
-        return Poem(text)
+        return Poem(text, label=seed, author="OpenAI")
 
-    def random_keys(self, size, dict):
+    def generate_book(self, size, seed, author="NaN"):
+        """
+        """
+        try:
+            keys = self.random_keys(size, self.book)
+            prompt_poems = {}
+            for key in keys:
+                prompt_poems.update({key: self.book[key]})
+        except NameError:
+            keys = self.random_keys(size, self.corpus)
+            prompt_poems = {}
+            for key in keys:
+                p = Poem(self.corpus[key], author=author)
+                prompt_poems.update({key: p})
+        p = self.header
+        for key, poem in prompt_poems.items():
+            p += "Seed: {}\nPoem: {}\n###\n".format(key, poem.text)
+        ai = openai.Completion.create(
+           engine=self.engine,
+           prompt=p + "Seed: " + seed + "\nPoem:",
+           temperature=self.temp,
+           max_tokens=self.max_len,
+           top_p=self.tp,
+           frequency_penalty=self.freq_pen,
+           presence_penalty=self.pres_pen,
+           stop=["###"]
+         )
+        prompt_poems.update({"%" + seed: Poem(ai.choices[0]["text"],
+                                        author="OpenAI", label="%" + seed,
+                                        delimiter="/")})
+        return Book(prompt_poems)
+
+    @staticmethod
+    def random_keys(size, dict):
         """
         Returns a list of pseudorandom keys from a provided dictionary of a given
         number of labeled examples of poems.
@@ -100,8 +160,8 @@ class Poet(object):
         Parameter size: the number of examples to be sampled from the corpus.
         Precondition: size is an int, where 0 <= size < corpus.size().
         Parameter dict: the corpus to be sampled.
-        Precondition: dict is a dictionary of labeled examples which are (preferably)
-            short in length, to reduce financial costs.
+        Precondition: dict is a dictionary of labeled examples which are
+        short in length, to reduce financial costs.
         """
         corpus_keys = list(dict.keys())
         sample_keys = []
@@ -111,6 +171,7 @@ class Poet(object):
                 sample_keys.append(corpus_keys[key_ix])
         return sample_keys
 
+    @staticmethod
     def build_prompt(self, size, dict, header):
         """
         Builds a prompt for OpenAI given a corpus of labeled examples.

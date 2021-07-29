@@ -3,9 +3,7 @@ import networkx as nx
 
 class bGraph(object):
     """
-    A base class for other graphs. Has useful getters, setters, and other
-    functions common to other graphs. Ideally, this would be a subclass of
-    nx.Graph(), but it is not (yet).
+    A base class for other graphs.
     """
 
     def __init__(self):
@@ -31,12 +29,12 @@ class bGraph(object):
 
     def write_gexf(self, name):
         """
-        Writes .gexf file of the graph to the folder "gephi"
+        Writes .gexf file of the graph to the path specified.
 
         Parameter name: the filename or path
         Precondition: name is a string ending in ".gexf"
         """
-        nx.write_gexf(self._g, "gexf/"+name)
+        nx.write_gexf(self._g, name)
 
     def get_num_nodes(self):
         """

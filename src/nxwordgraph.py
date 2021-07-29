@@ -1,11 +1,11 @@
-from bgraph import bGraph
+from basho.src.bgraph import bGraph
 import networkx as nx
 import networkx.algorithms as algs
 
 
 class WordGraph(bGraph):
     """
-    A instance is a DiGraph of words from a set of Poems.
+    An instance is a DiGraph of words from a set of Poems.
     """
 
     def __init__(self, poems):

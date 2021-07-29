@@ -4,7 +4,7 @@ documentation can be found here:
 https://github.com/thundercomb/poetrydb/blob/master/README.md
 
 """
-from poem import Poem
+from basho.src.poem import Poem
 import requests
 
 
@@ -17,7 +17,7 @@ class PdbWrangler(object):
         self._baseUrl = "https://poetrydb.org/"
 
     def get_poems(self, author=None, title=None, lines=None, linecount=None,
-                  poemcount=None, abs=False, d=" % "):
+                  poemcount=None, abs=False, d=" % ", **kwargs):
         """
         Returns a set of Poems from poetryDataBase matching given criteria.
 
@@ -51,10 +51,10 @@ class PdbWrangler(object):
         search = ';'.join([str(x) for x in search])
         url = self._baseUrl + input + '/' + search
         poems_json = self._get_json(url)
-        poems = self._to_poem(poems_json)
+        poems = self._to_poem(poems_json, **kwargs)
         return poems
 
-    def get_random_poems(self, num, d=" % "):
+    def get_random_poems(self, num, d=" % ", **kwargs):
         """
         Returns a set of a given number of random Poems.
 
@@ -66,10 +66,10 @@ class PdbWrangler(object):
         self._d = d
         url = self._baseUrl + "random/" + str(num)
         poems_json = self._get_json(url)
-        poems = self._to_poem(poems_json)
+        poems = self._to_poem(poems_json, **kwargs)
         return poems
 
-    def _to_poem(self, json_file):
+    def _to_poem(self, json_file, **kwargs):
         """
         Converts Json from poetrydb into a set of Poem objects.
 
@@ -78,14 +78,15 @@ class PdbWrangler(object):
         Parameter delim: The character(s) to place between lines in each poem.
         Precondition: delim is a string.
         """
-        poems = set()
+        poems = []
         for i in json_file:
             t = i["title"]
             a = i["author"]
             lines = i["lines"]
             text = self._d.join(lines)
-            poem = Poem(text.lower(), author=a, title=t, delimiter=self._d)
-            poems.add(poem)
+            poem = Poem(text.lower(), author=a, title=t, delimiter=self._d,
+                        **kwargs)
+            poems.append(poem)
         return poems
 
     def _get_json(self, url):

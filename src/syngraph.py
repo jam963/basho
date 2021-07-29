@@ -1,4 +1,4 @@
-from bgraph import bGraph
+from basho.src.bgraph import bGraph
 from nltk.corpus import wordnet as wn
 import re
 
@@ -10,7 +10,7 @@ class SynGraph(bGraph):
     hypo/hypernyms.
     """
 
-    def __init__(self, poem, hyp=True, regex=r"\W+"):
+    def __init__(self, text, hyp=True, regex=r"\W+"):
         """
         Initializer for the SynGraph class.
 
@@ -25,7 +25,7 @@ class SynGraph(bGraph):
         """
         super(SynGraph, self).__init__()
         self._syn_word = {}
-        for word in poem.get_words():
+        for word in text:
             # Remove non-alphanumeric chars from words except for those
             # specified in nonalpha.
             w = re.sub(regex, "", word)
@@ -40,6 +40,14 @@ class SynGraph(bGraph):
                     self._g.nodes[w]["occurrences"] += 1
                 for syn in syns:
                     self._hyp_adder(syn, w, self._g, self._syn_word, hyp)
+
+    @classmethod
+    def from_poem(cls, poem, **kwargs):
+        """
+        An initializer for Poems.
+        """
+        text = poem.get_words()
+        return cls(text, **kwargs)
 
     def _hyp_adder(self, syn, word, graph, dict, h):
         """
@@ -74,7 +82,7 @@ class SynGraph(bGraph):
         the length of the list of words associated with that synset.
         """
         syn_counts = {}
-        for key, value in self._syn_word:
+        for key, value in self._syn_word.items():
             syn_counts.update({key.name(): [len(value)]})
         return syn_counts
 
@@ -83,10 +91,10 @@ class SynGraph(bGraph):
         Returns a dictionary of {synset: [fraction]} pairs, where synset is a
         string representation of a synset in the SynGraph, and fraction is the
         length of the list of words associated with that synset divided by the
-        total number of nodes in the graph.
+        total number of edges in the graph.
         """
         syn_counts = {}
-        for key, value in self._syn_word:
-            frac = len(value)/self.get_num_nodes()
+        for key, value in self._syn_word.items():
+            frac = len(value)/self.get_num_edges()
             syn_counts.update({key.name(): [frac]})
         return syn_counts

@@ -3,6 +3,7 @@
 *.txt
 *.gexf
 *.gephi
+/tests
 /__pycache__
 /csv_tests.py
 /nltk_tests.py
