@@ -171,7 +171,6 @@ class Poet(object):
                 sample_keys.append(corpus_keys[key_ix])
         return sample_keys
 
-    @staticmethod
     def build_prompt(self, size, dict, header):
         """
         Builds a prompt for OpenAI given a corpus of labeled examples.
